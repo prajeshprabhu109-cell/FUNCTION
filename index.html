@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacroSync Solutions - AI Lead Coordinator (Maria)</title>
+
+    <script src="https://unpkg.com/retell-client-js-sdk@latest/dist/index.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+        .professional-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007bff; /* Professional Blue */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+        .professional-button:hover {
+            background-color: #0056b3;
+        }
+        #call-status {
+            margin-top: 25px;
+            font-weight: bold;
+            color: #333;
+            min-height: 20px;
+        }
+        h1 { color: #1a1a1a; }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to MacroSync Solutions</h1>
+    <p>Need to speak with a coordinator? Click below to connect instantly with Maria.</p>
+
+    <button class="professional-button" id="start-call-button">
+        📞 Start AI Voice Qualification
+    </button>
+
+    <p id="call-status">Status: Disconnected</p>
+
+    <script>
+        // CRITICAL: Your Retell Agent ID. Copy this exactly from your dashboard.
+        const RETELL_AGENT_ID = 'agent_d449b62818da89eed1124f76cf';
+
+        const startButton = document.getElementById('start-call-button');
+        const statusElement = document.getElementById('call-status');
+        const retellWebClient = new RetellWebClient();
+
+        // --- Event Listeners for Call Status ---
+        retellWebClient.on("call_started", () => {
+            statusElement.textContent = "🟢 Status: Call Connected! You are speaking to Maria. Start talking now.";
+            startButton.disabled = true;
+            startButton.textContent = "Call In Progress...";
+        });
+
+        retellWebClient.on("call_ended", () => {
+            statusElement.textContent = "✅ Status: Call Ended. Thank you for qualifying!";
+            startButton.disabled = false;
+            startButton.textContent = "📞 Start AI Voice Qualification";
+        });
+
+        retellWebClient.on("error", (error) => {
+            console.error("Call Initiation Error:", error);
+            statusElement.textContent = `❌ Status: Connection Error. Please check Netlify logs.`;
+            startButton.disabled = false;
+            startButton.textContent = "📞 Start AI Voice Qualification";
+        });
+
+        // --- Start Call Logic ---
+        startButton.addEventListener('click', async () => {
+            statusElement.textContent = "🟠 Status: Requesting secure connection via Netlify Function...";
+            startButton.disabled = true;
+
+            try {
+                // 1. Call your Netlify Function to get the secure token
+                // NOTE: The URL is relative, pointing to your function folder: /.netlify/functions/[FILENAME]
+                const response = await fetch('/.netlify/functions/create-retell-web-call', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_id: RETELL_AGENT_ID })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}. Key or Function issue.`);
+                }
+
+                const data = await response.json();
+
+                // 2. Start the in-browser call using the secure token
+                await retellWebClient.startCall({ accessToken: data.access_token });
+
+            } catch (error) {
+                console.error("Fatal Error:", error);
+                statusElement.textContent = `❌ ERROR: Could not connect to the backend server.`;
+                startButton.disabled = false;
+                startButton.textContent = "📞 Start AI Voice Qualification";
+            }
+        });
+    </script>
+</body>
+</html>

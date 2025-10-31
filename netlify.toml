@@ -1,0 +1,8 @@
+# File: netlify.toml
+[build]
+  # Tell Netlify to look for function files in the 'functions' directory
+  functions = "functions"
+
+# Optional: if your main website files are in a specific folder (like 'dist'), specify it here.
+# publish = "dist"
+

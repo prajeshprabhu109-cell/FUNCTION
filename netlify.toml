@@ -1,8 +1,12 @@
 # File: netlify.toml
 [build]
-  # Tell Netlify to look for function files in the 'functions' directory
-  functions = "functions"
+  # Remove the build command entirely
+  command = ""
+  # Tell Netlify to publish your main files from the root
+  publish = "."
 
-# Optional: if your main website files are in a specific folder (like 'dist'), specify it here.
-# publish = "dist"
-
+[functions]
+  # Tell Netlify where your functions are located
+  directory = "functions"
+  # Set the timeout higher to avoid issues during runtime
+  timeout = 10

@@ -1,12 +1,8 @@
-# File: netlify.toml
 [build]
-  # Remove the build command entirely
-  command = ""
-  # Tell Netlify to publish your main files from the root
+  command = "npm install"
   publish = "."
 
 [functions]
-  # Tell Netlify where your functions are located
   directory = "functions"
-  # Set the timeout higher to avoid issues during runtime
-  timeout = 10
+  node_bundler = "zisi"
+  # This line is sometimes necessary to prevent complex bundling errors.
